@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="SENA Docentes - Plataforma colaborativa pública para compartir recursos pedagógicos, experiencias educativas y construir conocimiento en comunidad." />
+  <title>SENA Docentes - Plataforma Colaborativa (Versión Pública)</title>
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'sena-green': '#39A900',
+            'sena-orange': '#FF6600',
+            'notebook-bg': '#F8F6F0',
+            'notebook-line': '#E5E3DD',
+            'ink-blue': '#1E3A8A'
+          },
+          fontFamily: {
+            'handwriting': ['Kalam', 'cursive'],
+            'notebook': ['Courier New', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap" rel="stylesheet" />
+
+  <!-- Estilos embebidos (estilos.css + extensiones para accesibilidad y modo oscuro) -->
+  <style>
+    /* estilos.css (original) */
+
+    /*
+    * Se eliminaron estilos distractores como:
+    * - notebook-paper: Las líneas pueden ser abrumadoras para personas con TDA/TDAH y baja visión.
+    * - notebook-margin: El borde rojo es un elemento visual que rompe la simplicidad.
+    * - handwriting: La fuente 'Kalam' no es una tipografía inclusiva de alta legibilidad.
+    * - fade-in y slide-in: Las animaciones pueden ser distractoras y causar mareo.
+    */
+
+    /*
+    * Se mantuvieron y ajustaron estilos esenciales:
+    * - Las clases de Tailwind CSS en el HTML ahora manejan el diseño principal.
+    * - Este archivo CSS se usa para reglas muy específicas o personalizadas.
+    */
+
+    /* Estilos base de legibilidad */
+    body {
+      font-size: 18px; /* Base original; será sobrescrita por la escala dinámica para mantener 18px por defecto */
+      line-height: 1.5;
+      font-family: 'Verdana', 'Arial', sans-serif;
+    }
+
+    .nav-btn { /* Tailwind maneja la mayoría de estilos */ }
+
+    .admin-buttons {
+      display: flex;
+      gap: 8px;
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      align-items: center;
+    }
+
+    .admin-buttons button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .admin-buttons button:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    .handwritten {
+      font-family: 'Verdana', 'Arial', sans-serif; /* Sustituida por legible */
+      transform: none; /* Sin rotación */
+    }
+
+    .security-indicator {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+
+    /* Extensiones: Accesibilidad (escala tipográfica) y Modo Oscuro */
+
+    :root {
+      /* 18px por defecto = 16px * 1.125 */
+      --font-scale: 1.125;
+      --color-bg: #F8F6F0;
+      --color-surface: #ffffff;
+      --color-text: #111827;
+      --color-text-muted: #4B5563;
+      --color-border: #D1D5DB;
+    }
+
+    html {
+      font-size: calc(16px * var(--font-scale));
+    }
+
+    /* Asegurar que el body herede de html y use 1rem (equivale a la escala) */
+    body {
+      font-size: 1rem !important;
+    }
+
+    /* Widget de accesibilidad (flotante, fijo centro-derecha) */
+    .accessibility-widget {
+      position: fixed;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .accessibility-widget button {
+      background: #111827;
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 9999px;
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+      transition: transform 0.12s ease, background 0.2s ease;
+    }
+
+    .accessibility-widget button:hover {
+      transform: translateY(-1px);
+      background: #0b1220;
+    }
+
+    .accessibility-widget button:focus-visible {
+      outline: 3px solid #22c55e; /* green-500 */
+      outline-offset: 2px;
+    }
+
+    .accessibility-widget .btn-label {
+      display: inline-block;
+      min-width: 1.2em;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    /* Estado accesible del toggle */
+    .accessibility-widget [aria-pressed="true"] {
+      background: #22c55e; /* green-500 */
+      color: #0b1220;
+      border-color: #16a34a; /* green-600 */
+    }
+
+    /* Modo oscuro con clase en html */
+    .theme-dark body {
+      background-color: #0b1220 !important;  /* slate-950 approx */
+      color: #e5e7eb !important;             /* gray-200 */
+    }
+
+    .theme-dark nav {
+      background-color: #111827 !important;  /* gray-900 */
+      color: #e5e7eb !important;
+    }
+
+    .theme-dark footer {
+      background-color: #0b1220 !important;
+      color: #e5e7eb !important;
+    }
+
+    /* Superficies habituales */
+    .theme-dark .bg-white { background-color: #111827 !important; }
+    .theme-dark .bg-gray-50 { background-color: #0f172a !important; }
+    .theme-dark .border-gray-300 { border-color: #374151 !important; }
+    .theme-dark .border-gray-700 { border-color: #48576a !important; }
+
+    /* Tipografías */
+    .theme-dark .text-gray-800,
+    .theme-dark .text-gray-700,
+    .theme-dark .text-gray-600 { color: #e5e7eb !important; }
+    .theme-dark .text-gray-500 { color: #cbd5e1 !important; }
+    .theme-dark .text-gray-400 { color: #94a3b8 !important; }
+
+    /* Inputs */
+    .theme-dark input,
+    .theme-dark textarea,
+    .theme-dark select {
+      background-color: #0b1220 !important;
+      color: #e5e7eb !important;
+      border-color: #374151 !important;
+    }
+
+    .theme-dark input::placeholder,
+    .theme-dark textarea::placeholder {
+      color: #94a3b8 !important;
+    }
+
+    /* Tarjetas de aviso claras -> más oscuras en dark */
+    .theme-dark .bg-yellow-50,
+    .theme-dark .bg-blue-50,
+    .theme-dark .bg-green-50,
+    .theme-dark .bg-orange-50 {
+      background-color: #1f2937 !important; /* gray-800 */
+    }
+
+    /* Indicador de seguridad: mantener contraste */
+    .theme-dark #securityStatus.bg-green-500 {
+      background-color: #16a34a !important;
+      color: #052e11 !important;
+    }
+
+    /* Ajustes del modal */
+    .theme-dark #authModal .bg-white {
+      background-color: #111827 !important;
+    }
+  </style>
+</head>
+<body class="bg-notebook-bg min-h-screen notebook-paper">
+  <!-- Indicador de Seguridad -->
+  <div class="security-indicator" role="status" aria-live="polite">
+    <div id="securityStatus" class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+      🔒 SEGURO
+    </div>
+  </div>
+
+  <!-- Navegación Principal -->
+  <nav class="bg-white shadow-lg border-b-4 border-sena-green sticky top-0 z-50" role="navigation" aria-label="Principal">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <div class="flex items-center">
+            <img src="logo.png" alt="" width="60px" class="flex items-center">
+            <p class="font-bold text-sena-green handwritten">Plataforma Colaborativa</p>
+          </div>
+        </div>
+
+        <div class="hidden md:block">
+          <div class="ml-10 flex items-baseline space-x-4">
+            <button onclick="showSection('inicio')" class="nav-btn bg-sena-green text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-green-600 transition-colors">
+              🏠 Inicio
+            </button>
+            <button onclick="showSection('recursos')" class="nav-btn text-gray-700 hover:text-sena-green px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              📚 Recursos
+            </button>
+            <button onclick="showSection('experiencias')" class="nav-btn text-gray-700 hover:text-sena-green px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              💡 Experiencias
+            </button>
+            <button onclick="showSection('comunidad')" class="nav-btn text-gray-700 hover:text-sena-green px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              👥 Comunidad
+            </button>
+            <button id="authBtn" onclick="toggleAuth()" class="bg-sena-orange text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-600 transition-colors">
+              🔐 Ingresar
+            </button>
+          </div>
+        </div>
+
+        <!-- Menú móvil -->
+        <div class="md:hidden">
+          <button onclick="toggleMobileMenu()" class="text-gray-700 hover:text-sena-green" aria-controls="mobileMenu" aria-expanded="false" aria-label="Abrir menú">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" role="img" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menú móvil desplegable -->
+    <div id="mobileMenu" class="md:hidden hidden bg-white border-t">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <button onclick="showSection('inicio')" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-sena-green">🏠 Inicio</button>
+        <button onclick="showSection('recursos')" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-sena-green">📚 Recursos</button>
+        <button onclick="showSection('experiencias')" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-sena-green">💡 Experiencias</button>
+        <button onclick="showSection('comunidad')" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-sena-green">👥 Comunidad</button>
+        <button onclick="toggleAuth()" class="block w-full text-left px-3 py-2 bg-sena-orange text-white rounded">🔐 Ingresar</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido Principal -->
+  <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Sección de Inicio -->
+    <section id="inicio" class="section-content">
+      <div class="bg-white rounded-lg shadow-xl p-8">
+        <div class="text-center mb-8">
+          <h2 class="text-4xl font-bold text-ink-blue handwritten mb-4">
+            Bienvenidos a la Plataforma Colaborativa
+          </h2>
+          <p class="text-lg text-gray-700 max-w-3xl mx-auto">
+            Un espacio digital diseñado especialmente para los docentes del programa Técnico en Programación 
+            del SENA Medellín, donde pueden compartir experiencias, recursos pedagógicos y construir conocimiento colaborativo e inclusivo.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-gradient-to-br from-sena-green to-green-600 text-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform">
+            <div class="text-3xl mb-4">📚</div>
+            <h3 class="text-xl font-bold mb-2">Recursos Pedagógicos</h3>
+            <p class="text-sm opacity-90">Comparte y accede a materiales educativos, ejercicios prácticos y herramientas de enseñanza.</p>
+          </div>
+
+          <div class="bg-gradient-to-br from-sena-orange to-orange-600 text-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform">
+            <div class="text-3xl mb-4">💡</div>
+            <h3 class="text-xl font-bold mb-2">Experiencias Educativas</h3>
+            <p class="text-sm opacity-90">Intercambia metodologías exitosas, casos de estudio y lecciones aprendidas.</p>
+          </div>
+
+          <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform">
+            <div class="text-3xl mb-4">👥</div>
+            <h3 class="text-xl font-bold mb-2">Comunidad Activa</h3>
+            <p class="text-sm opacity-90">Conecta con colegas, participa en discusiones y construye redes profesionales.</p>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor" role="img" aria-hidden="true">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-yellow-700">
+                <strong>Nota de Seguridad:</strong> Esta aplicación en su versión pública muestra contenidos embebidos y permite agregar nuevos recursos que se almacenan localmente en tu navegador.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Recursos -->
+    <section id="recursos" class="section-content hidden">
+      <div class="bg-white rounded-lg shadow-xl p-8">
+        <h2 class="text-3xl font-bold text-ink-blue handwritten mb-6">📚 Recursos Pedagógicos</h2>
+
+        <div class="flex items-center gap-4 mb-4">
+          <div class="flex-1">
+            <input id="resourceSearch" oninput="loadResources()" type="search" placeholder="Buscar recursos por título, descripción o categoría..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-green" />
+          </div>
+          <div>
+            <button onclick="showAddResourceForm()" class="bg-sena-green text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+              ➕ Agregar Recurso
+            </button>
+          </div>
+        </div>
+
+        <div id="addResourceForm" class="hidden bg-gray-50 p-6 rounded-lg mb-6">
+          <h3 class="text-xl font-bold mb-4">Nuevo Recurso Pedagógico</h3>
+          <form onsubmit="addResource(event)">
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Título del Recurso</label>
+                <input type="text" id="resourceTitle" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-green">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                <select id="resourceCategory" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-green">
+                  <option value="">Seleccionar categoría</option>
+                  <option value="ejercicios">Ejercicios Prácticos</option>
+                  <option value="teoria">Material Teórico</option>
+                  <option value="proyectos">Proyectos</option>
+                  <option value="evaluacion">Evaluación</option>
+                  <option value="herramientas">Herramientas</option>
+                  <option value="estrategia">Estrategia de Enseñanza</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+              <textarea id="resourceDescription" required rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-green"></textarea>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Contenido/Enlace</label>
+              <textarea id="resourceContent" rows="3" placeholder="Contenido del recurso o enlace a material externo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-green"></textarea>
+            </div>
+            <div class="flex gap-2">
+              <button type="submit" class="bg-sena-green text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">
+                Guardar Recurso
+              </button>
+              <button type="button" onclick="hideAddResourceForm()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="resourcesList" class="space-y-4"></div>
+
+        <div id="loginPromptResources" class="text-center py-8 hidden">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 class="text-xl font-semibold text-blue-800 mb-2">¡Únete a la Comunidad!</h3>
+            <p class="text-blue-600 mb-4">Inicia sesión para acceder a más funcionalidades.</p>
+            <button onclick="toggleAuth()" class="bg-sena-orange text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+              Iniciar Sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Experiencias -->
+    <section id="experiencias" class="section-content hidden">
+      <div class="bg-white rounded-lg shadow-xl p-8">
+        <h2 class="text-3xl font-bold text-ink-blue handwritten mb-6">💡 Experiencias Educativas</h2>
+
+        <div class="flex items-center gap-4 mb-4">
+          <div class="flex-1">
+            <input id="experienceSearch" oninput="loadExperiences()" type="search" placeholder="Buscar experiencias por título, descripción o área..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange" />
+          </div>
+          <div>
+            <button onclick="showAddExperienceForm()" class="bg-sena-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+              ➕ Compartir Experiencia
+            </button>
+          </div>
+        </div>
+
+        <div id="addExperienceForm" class="hidden bg-gray-50 p-6 rounded-lg mb-6">
+          <h3 class="text-xl font-bold mb-4">Nueva Experiencia Educativa</h3>
+          <form onsubmit="addExperience(event)">
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Título de la Experiencia</label>
+                <input type="text" id="experienceTitle" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Área Temática</label>
+                <select id="experienceArea" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange">
+                  <option value="">Seleccionar área</option>
+                  <option value="programacion">Programación</option>
+                  <option value="bases-datos">Bases de Datos</option>
+                  <option value="desarrollo-web">Desarrollo Web</option>
+                  <option value="metodologia">Metodología</option>
+                  <option value="evaluacion">Evaluación</option>
+                  <option value="motivacion">Motivación Estudiantil</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Descripción de la Experiencia</label>
+              <textarea id="experienceDescription" required rows="5" placeholder="Describe tu experiencia educativa, metodología utilizada, resultados obtenidos..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange"></textarea>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Lecciones Aprendidas</label>
+              <textarea id="experienceLessons" rows="3" placeholder="¿Qué aprendiste de esta experiencia? ¿Qué recomendarías a otros docentes?" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange"></textarea>
+            </div>
+            <div class="flex gap-2 flex-wrap">
+              <button type="submit" class="bg-sena-orange text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                Compartir Experiencia
+              </button>
+              <button type="button" onclick="hideAddExperienceForm()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="experiencesList" class="space-y-4"></div>
+
+        <div id="loginPromptExperiences" class="text-center py-8 hidden">
+          <div class="bg-orange-50 border border-orange-200 rounded-lg p-6">
+            <h3 class="text-xl font-semibold text-orange-800 mb-2">¡Comparte tu Experiencia!</h3>
+            <p class="text-orange-600 mb-4">Inicia sesión para compartir tus experiencias educativas y aprender de otros docentes.</p>
+            <button onclick="toggleAuth()" class="bg-sena-orange text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+              Iniciar Sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Comunidad -->
+    <section id="comunidad" class="section-content hidden">
+      <div class="bg-white rounded-lg shadow-xl p-8">
+        <h2 class="text-3xl font-bold text-ink-blue handwritten mb-6">👥 Comunidad de Docentes</h2>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+          <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-lg">
+            <h3 class="text-xl font-bold mb-4">📊 Estadísticas de la Comunidad</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span>Docentes Registrados:</span>
+                <span id="totalUsers" class="font-bold">0</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Recursos Compartidos:</span>
+                <span id="totalResources" class="font-bold">0</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Experiencias Publicadas:</span>
+                <span id="totalExperiences" class="font-bold">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white p-6 rounded-lg">
+            <h3 class="text-xl font-bold mb-4">🎯 Objetivos de la Plataforma</h3>
+            <ul class="space-y-2 text-sm">
+              <li>✅ Facilitar el intercambio de conocimientos</li>
+              <li>✅ Promover la colaboración entre docentes</li>
+              <li>✅ Mejorar la calidad educativa</li>
+              <li>✅ Crear una red de apoyo profesional</li>
+              <li>✅ Innovar en metodologías pedagógicas</li>
+            </ul>
+          </div>
+        </div>
+
+        <div id="loginPromptCommunity" class="text-center py-8 hidden">
+          <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+            <h3 class="text-xl font-semibold text-green-800 mb-2">¡Únete a la Comunidad!</h3>
+            <p class="text-green-600 mb-4">Inicia sesión para participar activamente.</p>
+            <button onclick="toggleAuth()" class="bg-sena-orange text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+              Iniciar Sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal de Autenticación -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div class="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-screen overflow-y-auto">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 id="authTitle" class="text-2xl font-bold text-ink-blue handwritten">Iniciar Sesión</h2>
+            <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600" aria-label="Cerrar">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" role="img" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Formulario de Inicio de Sesión -->
+          <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
+              <input type="email" id="loginEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-green" />
+            </div>
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+              <input type="password" id="loginPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-green" />
+            </div>
+            <button type="submit" class="w-full bg-sena-green text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors font-medium">
+              Iniciar Sesión
+            </button>
+          </form>
+
+          <!-- Formulario de Registro -->
+          <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo</label>
+              <input type="text" id="registerName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange" />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
+              <input type="email" id="registerEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange" />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Área de Especialización</label>
+              <select id="registerSpecialty" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange">
+                <option value="">Seleccionar especialización</option>
+                <option value="programacion-basica">Programación Básica</option>
+                <option value="programacion-avanzada">Programación Avanzada</option>
+                <option value="bases-datos">Bases de Datos</option>
+                <option value="desarrollo-web">Desarrollo Web</option>
+                <option value="desarrollo-movil">Desarrollo Móvil</option>
+                <option value="metodologia">Metodología Educativa</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+              <input type="password" id="registerPassword" required minlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange" />
+              <p class="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
+            </div>
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Contraseña</label>
+              <input type="password" id="registerPasswordConfirm" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sena-orange" />
+            </div>
+            <button type="submit" class="w-full bg-sena-orange text-white py-2 px-4 rounded-md hover:bg-orange-600 transition-colors font-medium">
+              Registrarse
+            </button>
+          </form>
+
+          <div class="mt-6 text-center">
+            <button id="toggleAuthMode" onclick="toggleAuthMode()" class="text-sena-green hover:text-green-600 text-sm font-medium">
+              ¿No tienes cuenta? Regístrate aquí
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white mt-12">
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-lg font-bold mb-4 handwritten">SENA Docentes</h3>
+          <p class="text-gray-300 text-sm">
+            Plataforma colaborativa para docentes del programa Técnico en Programación del SENA Medellín.
+            Facilitando el intercambio de conocimientos y experiencias educativas.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="text-md font-semibold mb-4">Características</h4>
+          <ul class="text-gray-300 text-sm space-y-2">
+            <li>🔒 Versión pública con contenidos embebidos</li>
+            <li>📱 Diseño responsivo</li>
+            <li>💾 Almacenamiento local para nuevas aportaciones</li>
+            <li>🚀 Interfaz sin dependencias críticas</li>
+            <li>🎨 Interfaz intuitiva</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-md font-semibold mb-4">Información del Proyecto</h4>
+          <div class="text-gray-300 text-sm space-y-2">
+            <p><strong>Versión:</strong> 1.0.0-public</p>
+            <p><strong>Tecnologías:</strong> HTML5, Tailwind CSS, JavaScript</p>
+            <p><strong>Compatibilidad:</strong> Todos los navegadores modernos</p>
+            <p><strong>Licencia:</strong> Uso educativo SENA</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-700 mt-8 pt-6 text-center">
+        <p class="text-gray-400 text-sm">
+          © 2025 Desarrollado por Yulian Flórez -  Harvey Meneses - Johan Stived Osorio
+        </p>
+        <center>
+        <img src="pie.png" alt="" width="250px">
+        </center>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Widget de Accesibilidad (flotante, centro-derecha) -->
+  <div class="accessibility-widget" role="region" aria-label="Controles de accesibilidad">
+    <button id="btnFontIncrease" type="button" title="Aumentar tamaño de fuente (A+)" aria-label="Aumentar tamaño de fuente">
+      <span class="btn-label">A+</span>
+    </button>
+    <button id="btnFontDecrease" type="button" title="Reducir tamaño de fuente (A−)" aria-label="Reducir tamaño de fuente">
+      <span class="btn-label">A−</span>
+    </button>
+    <button id="btnThemeToggle" type="button" title="Alternar modo oscuro" aria-label="Alternar modo oscuro" aria-pressed="false">
+      🌙
+    </button>
+  </div>
+
+  <script>
+    // Embedded content
+    (function(){
+      function randomDateISO(startISO, endISO) {
+        const start = new Date(startISO).getTime();
+        const end = new Date(endISO).getTime();
+        const t = start + Math.floor(Math.random() * (end - start + 1));
+        const d = new Date(t);
+        d.setUTCHours(0,0,0,0);
+        return d.toISOString();
+      }
+      const experienceDates = Array.from({length:8}, () => randomDateISO('2025-08-28T00:00:00.000Z','2025-08-31T23:59:59.999Z'));
+
+      const NEW_EMBEDDED_EXPERIENCES = [
+        { id: 'embedded-e-1', title: 'Aprendizaje Interactivo con freeCodeCamp', area: 'programacion', description: 'Mi experiencia con freeCodeCamp ha sido muy enriquecedora, pues permite que los estudiantes exploren temas de programación a su propio ritmo, con ejercicios aplicados y proyectos reales. He empleado metodologías de aprendizaje basado en proyectos, donde los alumnos desarrollan pequeños sistemas o aplicaciones. Los resultados han sido notables: mayor motivación, seguridad en la codificación y cooperación en grupo. Además, la plataforma mostró ser altamente inclusiva al ofrecer múltiples lenguajes y accesibilidad para necesidades diversas.', lessons: 'Aprendí el valor de los proyectos prácticos para potenciar el aprendizaje. Recomiendo a otros docentes utilizar los foros de la plataforma como apoyo colaborativo, ya que enriquecen la experiencia.', authorName: 'Dianeth Yamile León Valencia', creationDate: experienceDates[0] },
+        { id: 'embedded-e-2', title: 'Desarrollo Creativo con Scratch', area: 'motivacion', description: 'Usando Scratch pude introducir la lógica de programación a estudiantes principiantes de una manera divertida y accesible. Propuse la creación de historias y juegos sencillos como metodología. Los resultados fueron sorprendentes: los estudiantes mostraron gran motivación y creatividad, incluso aquellos con poca experiencia previa. La accesibilidad multilingüe permitió una inclusión destacada para estudiantes con diferentes contextos.', lessons: 'Aprendí que la creatividad es clave para despertar interés. Recomiendo empezar con proyectos sencillos y luego escalar a propuestas colaborativas.', authorName: 'Danilo González', creationDate: experienceDates[1] },
+        { id: 'embedded-e-3', title: 'Aprendizaje Adaptativo con Khan Academy', area: 'metodologia', description: 'Con Khan Academy, los estudiantes trabajaron en programación básica y animaciones. Utilicé aprendizaje autodirigido combinado con tutorías en pequeños grupos. El resultado fue un mayor dominio de conceptos y autonomía en el estudio. La manera gradual y visual de la plataforma facilita que distintos ritmos de aprendizaje sean respetados.', lessons: 'Aprendí que ofrecer recursos para autoestudio empodera al estudiante. Recomiendo a los docentes combinar las lecciones con talleres presenciales para reforzar la práctica.', authorName: 'Andres Felipe Mejia Florez', creationDate: experienceDates[2] },
+        { id: 'embedded-e-4', title: 'Creación de Aplicaciones con MIT App Inventor', area: 'desarrollo-web', description: 'Utilizar MIT App Inventor en el aula ha permitido que los estudiantes concreten ideas en apps funcionales. La metodología fue aprendizaje por proyectos: cada grupo diseñó una app para resolver un problema de su contexto. Los estudiantes se sintieron motivados al ver resultados tangibles, desarrollando tanto lógica como habilidades de diseño. La herramienta es inclusiva para principiantes, eliminando barreras técnicas.', lessons: 'Aprendí que la motivación aumenta cuando los proyectos tienen impacto real. Recomiendo a otros docentes proponer retos inspirados en necesidades locales.', authorName: 'Carlos Andrés Rueda López', creationDate: experienceDates[3] },
+        { id: 'embedded-e-5', title: 'Análisis Formativo con Dodona', area: 'evaluacion', description: 'Dodona me ayudó a dar retroalimentación en tiempo real a los estudiantes. Con mi metodología, planteé ejercicios de dificultad progresiva, y los estudiantes obtuvieron correcciones inmediatas. Esto aceleró la corrección de errores y permitió ajustes individuales en el aprendizaje. Sin embargo, observe la necesidad de mejorar la organización de los recursos pedagógicos para una búsqueda más ágil en la plataforma.', lessons: 'Aprendí que la retroalimentación automática favorece la autonomía. Recomiendo que los docentes exploren bien la base de datos y preparen previamente las actividades.', authorName: 'Walberto José Mercado Pérez', creationDate: experienceDates[4] },
+        { id: 'embedded-e-6', title: 'Contenidos Dinámicos con H5P', area: 'bases-datos', description: 'Con H5P diseñé actividades interactivas como quizzes y videos con preguntas insertadas para la enseñanza de bases de datos. La metodología fue aprendizaje activo, incentivando la participación constante en la clase virtual. Los estudiantes tuvieron una gran motivación y valoraron la accesibilidad en distintos dispositivos.', lessons: 'Aprendí que la interactividad mantiene la atención viva en los entornos virtuales. Recomiendo diseñar actividades variadas y usar las opciones de retroalimentación para reforzar conceptos clave.', authorName: 'Felipe Piedrahita Nieto', creationDate: experienceDates[5] },
+        { id: 'embedded-e-7', title: 'Secuencias Colaborativas con LAMS', area: 'metodologia', description: 'Implementar LAMS en las actividades permitió estructurar secuencias colaborativas donde los estudiantes trabajaban en grupos pequeños y luego en actividades de clase completa. Obtuve buenos resultados en la evaluación de competencias colaborativas. Sin embargo, considero necesario ampliar las herramientas en la plataforma de retroalimentación directa para fortalecer la interacción docente-estudiante.', lessons: 'Aprendí que la colaboración potencia la retención de conceptos. Recomiendo diseñar secuencias cortas, variadas y con objetivos claros.', authorName: 'Edwin Alejandro Pérez Ramírez', creationDate: experienceDates[6] },
+        { id: 'embedded-e-8', title: 'Gamificación del Aprendizaje con Kahoot!', area: 'motivacion', description: 'Con Kahoot! pude transformar las evaluaciones en un espacio divertido y competitivo. Mi metodología fue repaso de conceptos de programación mediante cuestionarios en tiempo real. Los resultados fueron evidentes: alta participación, entusiasmo y retroalimentación inmediata. La herramienta favoreció la inclusión de estudiantes con diferentes estilos de aprendizaje.', lessons: 'Aprendí que lo lúdico motiva profundamente. Recomiendo diseñar actividades de corta duración, enlazadas a los objetivos de la clase para mantener la atención y el dinamismo.', authorName: 'Jose Elias Padilla Ramos', creationDate: experienceDates[7] }
+      ];
+
+      const NEW_EMBEDDED_RESOURCES = [
+        { id: 'embedded-r-1', title: 'freeCodeCamp', category: 'herramientas', description: 'Plataforma sin fines de lucro con lecciones interactivas en HTML, CSS, JavaScript, Python, C#, entre otros, complementadas con proyectos reales, foros y comunidad global. Permite autoaprendizaje y trabajo en pares, ideal para diversos niveles y estilos; la comunidad apoya activamente a estudiantes con dificultades.', content: 'freeCodeCamp.org', authorName: 'SENA - Recursos', creationDate: experienceDates[0] },
+        { id: 'embedded-r-2', title: 'Scratch', category: 'herramientas', description: 'Lenguaje visual por bloques, diseñado por MIT, utilizado globalmente por jóvenes para crear historias, juegos y animaciones. Muy accesible, multilingüe (más de 70 idiomas), promueve creatividad, colaboración y remix de proyectos.', content: 'scratch.mit.edu', authorName: 'SENA - Recursos', creationDate: experienceDates[1] },
+        { id: 'embedded-r-3', title: 'Khan Academy (Programación)', category: 'herramientas', description: 'Plataforma educativa gratuita con lecciones en video, ejercicios y tablero de aprendizaje, incluyendo programación con JavaScript, HTML/CSS y animaciones. Favorece aprendizaje autodirigido y adaptativo, ideal para diferentes ritmos; formato claro y amigable.', content: 'khanacademy.org', authorName: 'SENA - Recursos', creationDate: experienceDates[2] },
+        { id: 'embedded-r-4', title: 'MIT App Inventor', category: 'herramientas', description: 'Herramienta visual para crear apps Android mediante bloques; permite diseño de interfaces, lógica de eventos y prueba en tiempo real. Transforma la programación en creación tangible, motiva con resultados reales.', content: 'appinventor.mit.edu', authorName: 'SENA - Recursos', creationDate: experienceDates[3] },
+        { id: 'embedded-r-5', title: 'Dodona', category: 'herramientas', description: 'Sistema de tutor virtual que proporciona retroalimentación automática y análisis de aprendizaje en tiempo real para ejercicios de programación. Apoya el aprendizaje activo, permite al docente orientar según datos individuales, ideal para niveles variados y evaluación formativa.', content: 'dodona.ugent.be', authorName: 'SENA - Recursos', creationDate: experienceDates[4] },
+        { id: 'embedded-r-6', title: 'H5P', category: 'herramientas', description: 'Herramienta abierta para crear contenido interactivo: videos, quizzes, presentaciones y juegos fácilmente integrables en plataformas LMS. Inclusión & dinamismo: Intuitivo, accesible y altamente visual; favorece que estudiantes colaboren en contenidos interactivos.', content: 'h5p.org', authorName: 'SENA - Recursos', creationDate: experienceDates[5] },
+        { id: 'embedded-r-7', title: 'LAMS', category: 'herramientas', description: 'Sistema libre para diseñar y ejecutar secuencias de actividades colaborativas: individuales, grupales y de clase completa. Visual, estructurado y flexible, permite variar ritmos, tipos de actividades y promover colaboración entre estudiantes.', content: 'lamsfoundation.org', authorName: 'SENA - Recursos', creationDate: experienceDates[6] },
+        { id: 'embedded-r-8', title: 'Kahoot!', category: 'herramientas', description: 'Plataforma de gamificación educativa donde el docente crea cuestionarios, encuestas y retos en formato de juego, con feedback inmediato. Favorece participación de todos los estudiantes (cada uno juega desde su dispositivo).', content: 'kahoot.com', authorName: 'SENA - Recursos', creationDate: experienceDates[7] },
+        { id: 'embedded-r-9', title: 'Quizizz', category: 'herramientas', description: 'Herramienta para crear quizzes interactivos con opciones de autoestudio y actividades en vivo, integrable con Google Classroom. Permite trabajar a ritmo propio (modo autoestudio), lo que ayuda a quienes necesitan más tiempo.', content: 'quizizz.com', authorName: 'SENA - Recursos', creationDate: experienceDates[Math.floor(Math.random()*experienceDates.length)] },
+        { id: 'embedded-r-10', title: 'Genially', category: 'herramientas', description: 'Plataforma online para crear presentaciones, infografías, juegos, escape rooms y recursos interactivos. No requiere conocimientos de diseño avanzado, y se pueden integrar videos, animaciones y elementos dinámicos. Favorece aprendizaje visual y kinestésico.', content: 'genially.com', authorName: 'SENA - Recursos', creationDate: experienceDates[Math.floor(Math.random()*experienceDates.length)] }
+      ];
+
+      window.EMBEDDED_EXPERIENCES = NEW_EMBEDDED_EXPERIENCES;
+      window.EMBEDDED_RESOURCES = NEW_EMBEDDED_RESOURCES;
+    })();
+
+    // Estado global
+    let currentUser = null;
+    let isLoginMode = true;
+
+    // Seguridad / validación
+    function sanitizeInput(input) {
+      if (typeof input !== 'string') return '';
+      return input.replace(/<script[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+\s*=/gi, '')
+        .trim();
+    }
+
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    function validatePassword(password) {
+      return password && password.length >= 6;
+    }
+
+    function showSecurityAlert(message, type = 'error') {
+      const securityStatus = document.getElementById('securityStatus');
+      const originalContent = securityStatus.innerHTML;
+
+      securityStatus.className = type === 'error'
+        ? 'bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold'
+        : 'bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold';
+
+      securityStatus.innerHTML = type === 'error' ? '⚠️ ALERTA' : '✅ ÉXITO';
+
+      setTimeout(() => {
+        securityStatus.className = 'bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold';
+        securityStatus.innerHTML = originalContent;
+      }, 3000);
+    }
+
+    // localStorage helpers
+    function safeLocalStorageGet(key) {
+      try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : null;
+      } catch (error) {
+        console.error('Error al leer localStorage:', error);
+        showSecurityAlert('Error al acceder al almacenamiento local');
+        return null;
+      }
+    }
+
+    function safeLocalStorageSet(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (error) {
+        console.error('Error al escribir localStorage:', error);
+        showSecurityAlert('Error al guardar en almacenamiento local');
+        return false;
+      }
+    }
+
+    // Utilidades de texto
+    function escapeHTML(str) {
+      if (typeof str !== 'string') return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function linkifyText(text) {
+      const t = typeof text === 'string' ? text.trim() : '';
+      if (!t) return '';
+      const escaped = escapeHTML(t);
+      let linked = escaped.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">$1<\/a>');
+      linked = linked.replace(/(^|[\s(])((www\.[^\s<]+))/g, function(_, prefix, url) {
+        const href = 'https://' + url;
+        return prefix + '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">' + url + '<\/a>';
+      });
+      if (!linked.includes('<a') && /^[\w.-]+\.[A-Za-z]{2,}(\/[^\s]*)?$/.test(t)) {
+        const href = 'https://' + t;
+        return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">' + escapeHTML(t) + '<\/a>';
+      }
+      return linked;
+    }
+
+    // Navegación
+    function showSection(sectionName) {
+      const sections = document.querySelectorAll('.section-content');
+      sections.forEach(section => {
+        section.classList.add('hidden');
+      });
+
+      const targetSection = document.getElementById(sectionName);
+      if (targetSection) {
+        targetSection.classList.remove('hidden');
+      }
+
+      const navButtons = document.querySelectorAll('.nav-btn');
+      navButtons.forEach(btn => {
+        btn.classList.remove('bg-sena-green', 'text-white');
+        btn.classList.add('text-gray-700', 'hover:text-sena-green');
+      });
+
+      const activeBtn = document.querySelector(`button[onclick="showSection('${sectionName}')"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-sena-green', 'text-white');
+        activeBtn.classList.remove('text-gray-700', 'hover:text-sena-green');
+      }
+
+      const mobileMenuEl = document.getElementById('mobileMenu');
+      if (mobileMenuEl) mobileMenuEl.classList.add('hidden');
+
+      loadSectionContent(sectionName);
+    }
+
+    function toggleMobileMenu() {
+      const mobileMenu = document.getElementById('mobileMenu');
+      const isHidden = mobileMenu.classList.toggle('hidden');
+      const trigger = document.querySelector('nav button[aria-controls="mobileMenu"]');
+      if (trigger) {
+        trigger.setAttribute('aria-expanded', String(!isHidden));
+      }
+    }
+
+    // Autenticación
+    function toggleAuth() {
+      if (currentUser) {
+        logout();
+      } else {
+        document.getElementById('authModal').classList.remove('hidden');
+      }
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.add('hidden');
+      resetAuthForms();
+    }
+
+    function toggleAuthMode() {
+      isLoginMode = !isLoginMode;
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const authTitle = document.getElementById('authTitle');
+      const toggleBtn = document.getElementById('toggleAuthMode');
+
+      if (isLoginMode) {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        authTitle.textContent = 'Iniciar Sesión';
+        toggleBtn.textContent = '¿No tienes cuenta? Regístrate aquí';
+      } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        authTitle.textContent = 'Registro de Usuario';
+        toggleBtn.textContent = '¿Ya tienes cuenta? Inicia sesión aquí';
+      }
+    }
+
+    function resetAuthForms() {
+      document.getElementById('loginForm').reset();
+      document.getElementById('registerForm').reset();
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      const email = sanitizeInput(document.getElementById('loginEmail').value);
+      const password = document.getElementById('loginPassword').value;
+
+      if (!validateEmail(email)) {
+        alert('Por favor, ingresa un correo electrónico válido.');
+        return;
+      }
+      if (!validatePassword(password)) {
+        alert('La contraseña debe tener al menos 6 caracteres.');
+        return;
+      }
+
+      const users = safeLocalStorageGet('sena_users') || [];
+      const user = users.find(u => u.email === email && u.password === password);
+
+      if (user) {
+        currentUser = user;
+        safeLocalStorageSet('sena_current_user', user);
+        updateUIForLoggedInUser();
+        closeAuthModal();
+        showSecurityAlert('Inicio de sesión exitoso', 'success');
+      } else {
+        alert('Credenciales incorrectas. Por favor, verifica tu correo y contraseña.');
+      }
+    }
+
+    function handleRegister(event) {
+      event.preventDefault();
+
+      const name = sanitizeInput(document.getElementById('registerName').value);
+      const email = sanitizeInput(document.getElementById('registerEmail').value);
+      const specialty = sanitizeInput(document.getElementById('registerSpecialty').value);
+      const password = document.getElementById('registerPassword').value;
+      const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+      if (!name || name.length < 2) {
+        alert('Por favor, ingresa un nombre válido (mínimo 2 caracteres).');
+        return;
+      }
+      if (!validateEmail(email)) {
+        alert('Por favor, ingresa un correo electrónico válido.');
+        return;
+      }
+      if (!specialty) {
+        alert('Por favor, selecciona tu área de especialización.');
+        return;
+      }
+      if (!validatePassword(password)) {
+        alert('La contraseña debe tener al menos 6 caracteres.');
+        return;
+      }
+      if (password !== passwordConfirm) {
+        alert('Las contraseñas no coinciden.');
+        return;
+      }
+
+      const users = safeLocalStorageGet('sena_users') || [];
+      if (users.find(u => u.email === email)) {
+        alert('Ya existe un usuario registrado con este correo electrónico.');
+        return;
+      }
+
+      const adminCredentials = [
+        'admin.sena@educacion.gov.co',
+        'coordinador.tecnico@sena.edu.co',
+        'director.programa@sena.edu.co'
+      ];
+      const isAdmin = adminCredentials.includes(email.toLowerCase());
+
+      const newUser = {
+        id: Date.now().toString(),
+        name: name,
+        email: email,
+        specialty: specialty,
+        password: password,
+        registrationDate: new Date().toISOString(),
+        resourceCount: 0,
+        experienceCount: 0,
+        role: isAdmin ? 'admin' : 'docente'
+      };
+
+      users.push(newUser);
+      if (safeLocalStorageSet('sena_users', users)) {
+        currentUser = newUser;
+        safeLocalStorageSet('sena_current_user', newUser);
+        updateUIForLoggedInUser();
+        closeAuthModal();
+        showSecurityAlert('Registro exitoso', 'success');
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('sena_current_user');
+      updateUIForLoggedOutUser();
+      showSection('inicio');
+      showSecurityAlert('Sesión cerrada correctamente', 'success');
+    }
+
+    function updateUIForLoggedInUser() {
+      const authBtn = document.getElementById('authBtn');
+      const userTitle = currentUser.role === 'admin' ? '👑 Admin' : '👋';
+      authBtn.textContent = `${userTitle} ${currentUser.name}`;
+      authBtn.onclick = () => {
+        if (confirm('¿Deseas cerrar sesión?')) {
+          logout();
+        }
+      };
+
+      if(currentUser.role === 'admin') {
+        document.getElementById('userResourcesSection')?.classList.remove('hidden');
+      } else {
+        document.getElementById('userResourcesSection')?.classList.add('hidden');
+      }
+      document.getElementById('userExperiencesSection')?.classList.remove('hidden');
+      document.getElementById('userCommunitySection')?.classList.remove('hidden');
+
+      document.getElementById('loginPromptResources')?.classList.add('hidden');
+      document.getElementById('loginPromptExperiences')?.classList.add('hidden');
+      document.getElementById('loginPromptCommunity')?.classList.add('hidden');
+
+      updateUserStats();
+      loadResources();
+      loadExperiences();
+    }
+
+    function updateUIForLoggedOutUser() {
+      const authBtn = document.getElementById('authBtn');
+      authBtn.textContent = '🔐 Ingresar';
+      authBtn.onclick = toggleAuth;
+
+      document.getElementById('userResourcesSection')?.classList.add('hidden');
+      document.getElementById('userExperiencesSection')?.classList.add('hidden');
+      document.getElementById('userCommunitySection')?.classList.add('hidden');
+
+      document.getElementById('loginPromptResources')?.classList.remove('hidden');
+      document.getElementById('loginPromptExperiences')?.classList.remove('hidden');
+      document.getElementById('loginPromptCommunity')?.classList.remove('hidden');
+
+      document.getElementById('resourcesList').innerHTML = '';
+      document.getElementById('experiencesList').innerHTML = '';
+    }
+
+    // Recursos
+    function showAddResourceForm() {
+      document.getElementById('addResourceForm').classList.remove('hidden');
+    }
+
+    function hideAddResourceForm() {
+      document.getElementById('addResourceForm').classList.add('hidden');
+      document.getElementById('addResourceForm').querySelector('form').reset();
+    }
+
+    function addResource(event) {
+      event.preventDefault();
+
+      const title = sanitizeInput(document.getElementById('resourceTitle').value);
+      const category = sanitizeInput(document.getElementById('resourceCategory').value);
+      const description = sanitizeInput(document.getElementById('resourceDescription').value);
+      const content = sanitizeInput(document.getElementById('resourceContent').value);
+
+      if (!title || !category || !description) {
+        alert('Por favor, completa todos los campos obligatorios.');
+        return;
+      }
+
+      const saved = safeLocalStorageGet('sena_resources') || [];
+      const newResource = {
+        id: Date.now().toString(),
+        title,
+        category,
+        description,
+        content,
+        authorId: currentUser ? currentUser.id : 'public-contributor',
+        authorName: currentUser ? currentUser.name : 'Colaborador Público',
+        creationDate: new Date().toISOString()
+      };
+
+      saved.push(newResource);
+      if (safeLocalStorageSet('sena_resources', saved)) {
+        hideAddResourceForm();
+        loadResources();
+        updateCommunityStats();
+        showSecurityAlert('Recurso agregado localmente', 'success');
+      }
+    }
+
+    function loadResources() {
+      const saved = safeLocalStorageGet('sena_resources') || [];
+      const combined = EMBEDDED_RESOURCES.concat(saved);
+
+      const query = (document.getElementById('resourceSearch')?.value || '').toLowerCase().trim();
+      const filtered = combined.filter(r => {
+        if (!query) return true;
+        return (r.title || '').toLowerCase().includes(query) ||
+               (r.description || '').toLowerCase().includes(query) ||
+               (r.category || '').toLowerCase().includes(query);
+      });
+
+      const resourcesList = document.getElementById('resourcesList');
+
+      if (filtered.length === 0) {
+        resourcesList.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <div class="text-4xl mb-4">📚</div>
+            <p>No se encontraron recursos para la búsqueda.</p>
+          </div>
+        `;
+        return;
+      }
+
+      resourcesList.innerHTML = filtered.map((resource) => {
+        return `
+          <div class="bg-gray-50 border-l-4 border-sena-green p-6 rounded-lg shadow-sm relative">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-lg font-bold text-ink-blue">${escapeHTML(resource.title)}</h3>
+              <div class="flex items-center gap-3">
+                <span class="bg-sena-green text-white px-2 py-1 rounded text-xs">${escapeHTML(getCategoryName(resource.category))}</span>
+              </div>
+            </div>
+            <p class="text-gray-700 mb-3">${escapeHTML(resource.description)}</p>
+            ${resource.content ? `
+              <div class="bg-white p-3 rounded border mb-3">
+                <div class="text-sm text-gray-600 break-words">${linkifyText(resource.content)}</div>
+              </div>
+            ` : ''}
+            <div class="text-sm text-gray-600 mb-3">Por: <strong>${escapeHTML(resource.authorName || 'SENA')}</strong> - ${new Date(resource.creationDate).toLocaleDateString('es-ES')}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getCategoryName(category) {
+      const categories = {
+        'ejercicios': 'Ejercicios',
+        'teoria': 'Teoría',
+        'proyectos': 'Proyectos',
+        'evaluacion': 'Evaluación',
+        'herramientas': 'Herramientas',
+        'estrategia': 'Estrategia'
+      };
+      return categories[category] || category;
+    }
+
+    // Experiencias
+    function showAddExperienceForm() {
+      document.getElementById('addExperienceForm').classList.remove('hidden');
+    }
+
+    function hideAddExperienceForm() {
+      document.getElementById('addExperienceForm').classList.add('hidden');
+      document.getElementById('addExperienceForm').querySelector('form').reset();
+    }
+
+    function addExperience(event) {
+      event.preventDefault();
+
+      const title = sanitizeInput(document.getElementById('experienceTitle').value);
+      const area = sanitizeInput(document.getElementById('experienceArea').value);
+      const description = sanitizeInput(document.getElementById('experienceDescription').value);
+      const lessons = sanitizeInput(document.getElementById('experienceLessons').value);
+
+      if (!title || !area || !description) {
+        alert('Por favor, completa todos los campos obligatorios.');
+        return;
+      }
+
+      const saved = safeLocalStorageGet('sena_experiences') || [];
+      const newExperience = {
+        id: Date.now().toString(),
+        title,
+        area,
+        description,
+        lessons,
+        authorId: currentUser ? currentUser.id : 'public-contributor',
+        authorName: currentUser ? currentUser.name : 'Colaborador Público',
+        creationDate: new Date().toISOString()
+      };
+
+      saved.push(newExperience);
+      if (safeLocalStorageSet('sena_experiences', saved)) {
+        hideAddExperienceForm();
+        loadExperiences();
+        updateCommunityStats();
+        showSecurityAlert('Experiencia agregada localmente', 'success');
+      }
+    }
+
+    function loadExperiences() {
+      const saved = safeLocalStorageGet('sena_experiences') || [];
+      const combined = EMBEDDED_EXPERIENCES.concat(saved);
+
+      const query = (document.getElementById('experienceSearch')?.value || '').toLowerCase().trim();
+      const filtered = combined.filter(e => {
+        if (!query) return true;
+        return (e.title || '').toLowerCase().includes(query) ||
+               (e.description || '').toLowerCase().includes(query) ||
+               (e.area || '').toLowerCase().includes(query);
+      });
+
+      const experiencesList = document.getElementById('experiencesList');
+
+      if (filtered.length === 0) {
+        experiencesList.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <div class="text-4xl mb-4">💡</div>
+            <p>No se encontraron experiencias para la búsqueda.</p>
+          </div>
+        `;
+        return;
+      }
+
+      experiencesList.innerHTML = filtered.map((experience) => `
+        <div class="bg-gray-50 border-l-4 border-sena-orange p-6 rounded-lg shadow-sm relative">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold text-ink-blue">${escapeHTML(experience.title)}</h3>
+            <span class="bg-sena-orange text-white px-2 py-1 rounded text-xs">${escapeHTML(getAreaName(experience.area))}</span>
+          </div>
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-800 mb-2">Descripción de la Experiencia:</h4>
+            <p class="text-gray-700">${escapeHTML(experience.description)}</p>
+          </div>
+          ${experience.lessons ? `
+            <div class="bg-yellow-50 border border-yellow-200 p-3 rounded mb-3">
+              <h4 class="font-semibold text-yellow-800 mb-2">💡 Lecciones Aprendidas:</h4>
+              <p class="text-yellow-700 text-sm">${escapeHTML(experience.lessons)}</p>
+            </div>
+          ` : ''}
+          <div class="flex justify-between items-center text-sm text-gray-500">
+            <span>Por: <strong>${escapeHTML(experience.authorName || 'SENA')}</strong></span>
+            <span>${new Date(experience.creationDate).toLocaleDateString('es-ES')}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getAreaName(area) {
+      const areas = {
+        'programacion': 'Programación',
+        'bases-datos': 'Bases de Datos',
+        'desarrollo-web': 'Desarrollo Web',
+        'metodologia': 'Metodología',
+        'evaluacion': 'Evaluación',
+        'motivacion': 'Motivación'
+      };
+      return areas[area] || area;
+    }
+
+    // Estadísticas
+    function updateUserStats() {
+      if (!currentUser) return;
+      document.getElementById('userResourceCount') && (document.getElementById('userResourceCount').textContent = currentUser.resourceCount || 0);
+      document.getElementById('userExperienceCount') && (document.getElementById('userExperienceCount').textContent = currentUser.experienceCount || 0);
+    }
+
+    function updateCommunityStats() {
+      const users = safeLocalStorageGet('sena_users') || [];
+      const resources = (EMBEDDED_RESOURCES.concat(safeLocalStorageGet('sena_resources') || []));
+      const experiences = (EMBEDDED_EXPERIENCES.concat(safeLocalStorageGet('sena_experiences') || []));
+
+      document.getElementById('totalUsers').textContent = users.length;
+      document.getElementById('totalResources').textContent = resources.length;
+      document.getElementById('totalExperiences').textContent = experiences.length;
+    }
+
+    function loadSectionContent(sectionName) {
+      switch (sectionName) {
+        case 'recursos':
+          loadResources();
+          break;
+        case 'experiencias':
+          loadExperiences();
+          break;
+        case 'comunidad':
+          updateCommunityStats();
+          break;
+      }
+    }
+
+    // Admin predeterminado
+    function initializeAdminAccounts() {
+      const users = safeLocalStorageGet('sena_users') || [];
+      const defaultAdmins = [
+        {
+          id: 'admin-001',
+          name: 'Administrador Principal SENA',
+          email: 'admin.sena@educacion.gov.co',
+          specialty: 'metodologia',
+          password: 'SenaAdmin2024!',
+          registrationDate: new Date().toISOString(),
+          resourceCount: 0,
+          experienceCount: 0,
+          role: 'admin'
+        }
+      ];
+
+      let adminAccountsCreated = false;
+      defaultAdmins.forEach(admin => {
+        const existingAdmin = users.find(u => u.email === admin.email);
+        if (!existingAdmin) {
+          users.push(admin);
+          adminAccountsCreated = true;
+        }
+      });
+
+      if (adminAccountsCreated) {
+        safeLocalStorageSet('sena_users', users);
+        console.log('Cuentas de administrador inicializadas correctamente');
+      }
+    }
+
+    // Seguridad adicional
+    window.addEventListener('error', function(event) {
+      console.error('Error en la aplicación:', event.error);
+      showSecurityAlert('Se produjo un error en la aplicación');
+    });
+
+    window.addEventListener('beforeunload', function() {
+      const scripts = document.querySelectorAll('script[src*="javascript:"], script[src*="data:"]');
+      scripts.forEach(script => script.remove());
+    });
+
+    function checkSecurityThreats() {
+      const suspiciousPatterns = [
+        /<script/i,
+        /javascript:/i,
+        /on\w+\s*=/i,
+        /<iframe/i,
+        /<object/i,
+        /<embed/i
+      ];
+
+      const inputs = document.querySelectorAll('input, textarea');
+      inputs.forEach(input => {
+        input.addEventListener('input', function() {
+          const value = this.value;
+          if (suspiciousPatterns.some(pattern => pattern.test(value))) {
+            this.value = sanitizeInput(value);
+            showSecurityAlert('Contenido potencialmente peligroso detectado y limpiado');
+          }
+        });
+      });
+    }
+
+    // Preferencias de accesibilidad (modo oscuro + escala tipográfica)
+    (function setupAccessibilityControls() {
+      const PREFS_KEY = 'sena_ui_prefs';
+      const MIN_SCALE = 0.875;   // ~14px
+      const MAX_SCALE = 1.75;    // ~28px
+      const STEP = 0.125;
+
+      function loadPrefs() {
+        const saved = safeLocalStorageGet(PREFS_KEY);
+        return {
+          fontScale: (saved && typeof saved.fontScale === 'number') ? saved.fontScale : 1.125, // 18px por defecto
+          darkMode: !!(saved && saved.darkMode)
+        };
+      }
+
+      function savePrefs(p) {
+        safeLocalStorageSet(PREFS_KEY, p);
+      }
+
+      function applyPrefs(p) {
+        document.documentElement.style.setProperty('--font-scale', String(p.fontScale));
+        document.documentElement.classList.toggle('theme-dark', p.darkMode);
+        const btnToggle = document.getElementById('btnThemeToggle');
+        if (btnToggle) btnToggle.setAttribute('aria-pressed', String(p.darkMode));
+      }
+
+      const prefs = loadPrefs();
+      applyPrefs(prefs);
+
+      const btnPlus = document.getElementById('btnFontIncrease');
+      const btnMinus = document.getElementById('btnFontDecrease');
+      const btnTheme = document.getElementById('btnThemeToggle');
+
+      btnPlus?.addEventListener('click', () => {
+        prefs.fontScale = Math.min(MAX_SCALE, Math.round((prefs.fontScale + STEP) * 1000) / 1000);
+        applyPrefs(prefs);
+        savePrefs(prefs);
+      });
+
+      btnMinus?.addEventListener('click', () => {
+        prefs.fontScale = Math.max(MIN_SCALE, Math.round((prefs.fontScale - STEP) * 1000) / 1000);
+        applyPrefs(prefs);
+        savePrefs(prefs);
+      });
+
+      btnTheme?.addEventListener('click', () => {
+        prefs.darkMode = !prefs.darkMode;
+        applyPrefs(prefs);
+        savePrefs(prefs);
+      });
+    })();
+
+    // Inicialización
+    function initializeApp() {
+      initializeAdminAccounts();
+
+      const savedUser = safeLocalStorageGet('sena_current_user');
+      if (savedUser) {
+        currentUser = savedUser;
+        updateUIForLoggedInUser();
+      }
+
+      showSection('inicio');
+      updateCommunityStats();
+
+      if (typeof Storage === "undefined") {
+        alert('Tu navegador no soporta almacenamiento local. Algunas funciones pueden no estar disponibles.');
+        showSecurityAlert('Navegador no compatible completamente');
+      }
+
+      console.log('Aplicación SENA Docentes (versión pública) inicializada correctamente');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeApp();
+      checkSecurityThreats();
+    });
+  </script>
+</body>
+</html>
